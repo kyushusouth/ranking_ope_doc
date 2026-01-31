@@ -1,0 +1,157 @@
+\documentclass[12pt]{jarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[top=30truemm, bottom=30truemm, left=20truemm, right=20truemm]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{siunitx}
+\usepackage{bm}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[dvipdfmx]{color}
+\usepackage[subrefformat=parens]{subcaption}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{tocloft}
+\usepackage{enumerate}
+\usepackage{url}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{enumitem}
+\usepackage{makecell}
+\usepackage{array}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{physics}
+\usepackage{hyperref}
+
+\numberwithin{equation}{section}    % 数式番号にセクション番号をつける
+\numberwithin{figure}{section}      % 図番号にセクション
+\numberwithin{table}{section}      % 図番号にセクション
+
+% \renewcommand{\figurename}{Fig.}    % 図 -> Fig.
+% \renewcommand{\tablename}{Table }   % 表 -> Table
+
+\renewcommand{\baselinestretch}{1.1}
+
+\newlength{\figcaptionskip}
+\setlength{\figcaptionskip}{5pt} % 図のキャプション間隔
+\newlength{\tabcaptionskip}
+\setlength{\tabcaptionskip}{-5pt} % 表のキャプション間隔
+\captionsetup[figure]{skip=\figcaptionskip}
+\captionsetup[table]{skip=\tabcaptionskip}
+
+\setlist[enumerate]{topsep=5pt, partopsep=5pt, itemsep=0pt, parsep=0pt}
+\setlength{\topsep}{5pt}
+\setlength{\partopsep}{5pt}
+
+\DeclareSIUnit{\fps}{fps}
+\DeclareSIUnit{\dBFS}{dBFS}
+
+\captionsetup[subfigure]{labelformat=simple}
+\renewcommand{\thesubfigure}{(\alph{subfigure})}
+
+\allowdisplaybreaks[4]
+
+\begin{document}
+
+\section{はじめに}
+
+本資料では、ランキング問題におけるオフ方策評価を扱う。
+
+\section{推薦枠内におけるランキングのオフ方策評価}
+
+\subsection{KPIを設定する}
+
+KPIは、推薦枠において発生する総CV数とする。
+
+\subsection{データの観測構造をモデル化する}
+
+対象となる推薦枠においてコンバージョンが発生するまでの一連の流れを以下のように整理する。
+
+\begin{enumerate}
+    \item ユーザーがサービスに訪問する。
+    \item 訪問ユーザーに対して、推薦枠内に複数のアイテムがランキング形式で表示される。
+    \item ユーザーの興味において、推薦枠内のいずれかのアイテムがクリックされる。クリックが発生しないケースもあり得る。
+    \item クリックされたアイテムについて、アイテム詳細ページに遷移した後、ユーザーの意思決定に基づきコンバージョンが発生するか否かが決定される。
+\end{enumerate}
+
+ログデータ$\mathcal{D}$は、以下のように定義する。
+\begin{equation}
+    \mathcal{D} = \{(u_{i}, S_{i}, C_{i}, C_{i}R_{i})\}_{i = 1}^{n}
+\end{equation}
+
+ログデータ$\mathcal{D}$の各要素は、独立同分布に従うとする。ログデータ$\mathcal{D}$の従う確率分布は、
+\begin{equation}
+    p(\mathcal{D}) = \prod_{i = 1}^{n} p(u_{i}, S_{i}, C_{i}, C_{i}R_{i}) = \prod_{i = 1}^{n} p(u_{i}) \pi_{0}(S_{i} | x_{u_{i}}) p(C_{i}, R_{i} | x_{u_{i}}, S_{i})
+\end{equation}
+とする。
+
+\subsection{解くべき問題を特定する}
+
+KPIは、推薦枠において発生する総CV数とした。これより、方策の価値は推薦枠における期待CV数を表す
+\begin{equation}
+    V(\pi) = \mathbb{E}_{p(u)\pi(S|x_{u})p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K} C_{k}R_{k}\right]
+\end{equation}
+とする。
+
+\subsection{観測データのみを用いて問題を解く方法を考える}
+
+既存の推薦モデル$\pi_{0}$の下で収集されたログデータ$D_{0}$のみを用いて、新たな推薦モデル$\pi$を導入した場合の方策の価値$V(\pi)$を推定するための推定量を考える。また、各推定量について、方策の価値$V(\pi)$に対するバイアスとバリアンスを導出し、推定量の性質を考察する。
+
+\subsubsection{IPS推定量}
+
+IPS推定量は、
+\begin{equation}
+    \hat{V}_{\text{IPS}}(\pi; \mathcal{D}) = \frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
+
+まず、IPS推定量のバイアスを求めるため、$p(\mathcal{D})$の下での期待値を求める。
+\begin{align}
+    \mathbb{E}_{p(\mathcal{D})}\left[\hat{V}_{\text{IPS}}(\pi; \mathcal{D})\right] & = \mathbb{E}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                          \\
+                                                                                   & = \frac{1}{n} \sum_{i = 1}^{n} \mathbb{E}_{p(\mathcal{D})}\left[\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                         \\
+                                                                                   & = \frac{1}{n} \sum_{i = 1}^{n} \mathbb{E}_{p(u_{i}) \pi_{0}(S_{i} | x_{u_{i}}) p(C_{i}, R_{i} | x_{u_{i}}, S_{i})}\left[\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right] \\
+                                                                                   & = \mathbb{E}_{p(u) \pi_{0}(S | x_{u}) p(C, R | x_{u}, S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]                                                                                  \\
+                                                                                   & = \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C, R|x_{u}, S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right]                                                              \\
+                                                                                   & = \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \mathbb{E}_{p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right]                                                              \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\mathbb{E}_{\pi_{0}(S|x_{u})}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \mathbb{E}_{p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right]\right]                                    \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{S \in \mathcal{S}} \pi_{0}(S|x_{u}) \frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \mathbb{E}_{p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right]                                    \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{S \in \mathcal{S}} \pi(S|x_{u}) \mathbb{E}_{p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right]                                                                              \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\mathbb{E}_{\pi(S|x_{u})}\left[\mathbb{E}_{p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right]\right]                                                                              \\
+                                                                                   & = \mathbb{E}_{p(u)\pi(S|x_{u})p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]                                                                                                                                    \\
+                                                                                   & = V(\pi)
+\end{align}
+これより、IPS推定量のバイアスは0である。
+
+次に、IPS推定量のバリアンスを求める。
+\begin{align}
+    \mathbb{V}_{p(\mathcal{D})}\left[\hat{V}_{\text{IPS}}(\pi; \mathcal{D})\right]
+     & = \mathbb{V}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                          \\
+     & = \frac{1}{n^{2}} \sum_{i = 1}^{n} \mathbb{V}_{p(\mathcal{D})}\left[\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                     \\
+     & = \frac{1}{n} \mathbb{V}_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]                                                                              \\
+     & = \frac{1}{n} \begin{aligned}[t]
+                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{V}_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right]           \\
+                                 & + \mathbb{V}_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
+                     \end{aligned}                                       \\
+     & = \frac{1}{n} \begin{aligned}[t]
+                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\left(\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\right)^{2}\mathbb{V}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \\
+                                 & + \mathbb{V}_{p(u)\pi_{0}(S|x_{u})}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\mathbb{E}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
+                     \end{aligned}
+\end{align}
+アイテム数が多い場合にはランキングの組み合わせも多くなるため、$\pi_{0}(S|x_{u})$が小さくなることでバリアンスが大きくなることが予想される。
+
+\subsubsection{IIPS推定量}
+
+\subsubsection{SNIIPS推定量}
+
+\subsubsection{Naive推定量}
+
+\subsubsection{DM推定量}
+
+\subsubsection{DR推定量}
+
+\clearpage
+
+\section{プラットフォーム全体におけるランキングのオフ方策評価}
+
+\end{document}
