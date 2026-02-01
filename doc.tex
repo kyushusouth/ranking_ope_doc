@@ -1,6 +1,6 @@
 \documentclass[12pt]{jarticle}
 \usepackage[utf8]{inputenc}
-\usepackage[top=30truemm, bottom=30truemm, left=20truemm, right=20truemm]{geometry}
+\usepackage[top=30truemm, bottom=30truemm, left=10truemm, right=10truemm]{geometry}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
@@ -23,6 +23,7 @@
 \usepackage{algpseudocode}
 \usepackage{physics}
 \usepackage{hyperref}
+\usepackage{dsfont}
 
 \numberwithin{equation}{section}    % 数式番号にセクション番号をつける
 \numberwithin{figure}{section}      % 図番号にセクション
@@ -125,28 +126,89 @@ IPS推定量は、
 
 次に、IPS推定量のバリアンスを求める。
 \begin{align}
-    \mathbb{V}_{p(\mathcal{D})}\left[\hat{V}_{\text{IPS}}(\pi; \mathcal{D})\right]
-     & = \mathbb{V}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                          \\
-     & = \frac{1}{n^{2}} \sum_{i = 1}^{n} \mathbb{V}_{p(\mathcal{D})}\left[\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                     \\
-     & = \frac{1}{n} \mathbb{V}_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]                                                                              \\
+    V_{p(\mathcal{D})}\left[\hat{V}_{\text{IPS}}(\pi; \mathcal{D})\right]
+     & = V_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                                 \\
+     & = \frac{1}{n^{2}} \sum_{i = 1}^{n} V_{p(\mathcal{D})}\left[\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]                                                            \\
+     & = \frac{1}{n} V_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]                                                                                     \\
      & = \frac{1}{n} \begin{aligned}[t]
-                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{V}_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right]           \\
-                                 & + \mathbb{V}_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
+                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[V_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right]           \\
+                                 & + V_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C,R|x_{u},S)}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})} \sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
                      \end{aligned}                                       \\
      & = \frac{1}{n} \begin{aligned}[t]
-                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\left(\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\right)^{2}\mathbb{V}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \\
-                                 & + \mathbb{V}_{p(u)\pi_{0}(S|x_{u})}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\mathbb{E}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
+                         \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[\left(\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\right)^{2}V_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \\
+                                 & + V_{p(u)\pi_{0}(S|x_{u})}\left[\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}\mathbb{E}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K}C(k)R(k)\right]\right] \Biggr)
                      \end{aligned}
 \end{align}
 アイテム数が多い場合にはランキングの組み合わせも多くなるため、$\pi_{0}(S|x_{u})$が小さくなることでバリアンスが大きくなることが予想される。
 
 \subsubsection{IIPS推定量}
 
+IIPS推定量は、
+\begin{equation}
+    \hat{V}_{\text{IIPS}}(\pi;\mathcal{D}) = \frac{1}{n}\sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
+
+まず、IIPS推定量のバイアスを求めるため、$p(\mathcal{D})$の下での期待値を求める。
+\begin{align}
+    \mathbb{E}_{p(\mathcal{D})}\left[\hat{V}_{\text{IIPS}}(\pi;\mathcal{D})\right] & = \mathbb{E}_{p(\mathcal{D})}\left[\frac{1}{n}\sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)\right]                                                                \\
+                                                                                   & = \frac{1}{n} \sum_{i = 1}^{n} \mathbb{E}_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)} \left[\sum_{k = 1}^{K} \frac{\pi(S(k) | x_{u}, k)}{\pi_{0}(S(k) | x_{u}, k)} C(k)R(k)\right]                                                                 \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\mathbb{E}_{\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K} \frac{\pi(S(k) | x_{u}, k)}{\pi_{0}(S(k) | x_{u}, k)} C(k)R(k)\right]\right]\right]                                           \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\mathbb{E}_{\pi_{0}(S|x_{u})}\left[\sum_{k = 1}^{K} \frac{\pi(S(k) | x_{u}, k)}{\pi_{0}(S(k) | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},S)}\left[C(k)R(k)\right]\right]\right]                                           \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\mathbb{E}_{\pi_{0}(S|x_{u})}\left[\sum_{k = 1}^{K} \frac{\pi(S(k) | x_{u}, k)}{\pi_{0}(S(k) | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},S(k))}\left[C(k)R(k)\right]\right]\right]                                        \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{S \in \mathcal{S}} \pi_{0}(S|x_{u}) \sum_{k = 1}^{K} \frac{\pi(S(k) | x_{u}, k)}{\pi_{0}(S(k) | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},S(k))}\left[C(k)R(k)\right]\right]                                        \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{S \in \mathcal{S}} \pi_{0}(S|x_{u}) \sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \frac{\pi(a | x_{u}, k)}{\pi_{0}(a | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \mathds{1}\{S(k) = a\}\right] \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \frac{\pi(a | x_{u}, k)}{\pi_{0}(a | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \sum_{S \in \mathcal{S}} \pi_{0}(S|x_{u}) \mathds{1}\{S(k) = a\}\right] \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \frac{\pi(a | x_{u}, k)}{\pi_{0}(a | x_{u}, k)} \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \pi_{0}(a|x_{u},k)\right]                                               \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \pi(a | x_{u}, k) \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right]\right]                                                                                                \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \left(\sum_{S \in \mathcal{S}} \pi(S|x_{u}) \mathds{1}\{S(k) = a\}\right)\right]                                        \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \sum_{S \in \mathcal{S}} \pi(S|x_{u}) \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \mathds{1}\{S(k) = a\}\right]                                                     \\
+                                                                                   & = \mathbb{E}_{p(u)}\left[\sum_{S \in \mathcal{S}} \pi(S|x_{u}) \sum_{k = 1}^{K} \sum_{a \in \mathcal{A}} \mathbb{E}_{p(C,R|x_{u},a)}\left[C(k)R(k)\right] \mathds{1}\{S(k) = a\}\right]                                                     \\
+                                                                                   & = \mathbb{E}_{p(u)\pi(S|x_{u})}\left[\sum_{k = 1}^{K} \mathbb{E}_{p(C,R|x_{u},S(k))}\left[C(k)R(k)\right]\right]                                                                                                                            \\
+                                                                                   & =\mathbb{E}_{p(u)\pi(S|x_{u})}\left[\sum_{k = 1}^{K} \mathbb{E}_{p(C,R|x_{u},S)}\left[C(k)R(k)\right]\right]                                                                                                                                \\
+                                                                                   & =\mathbb{E}_{p(u)\pi(S|x_{u})p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K} C(k)R(k)\right]                                                                                                                                                          \\
+                                                                                   & = V(\pi)
+\end{align}
+これより、IIPS推定量のバイアスは、独立性が満たされる状況では0である。
+
+次に、IIPS推定量のバリアンスを求める。
+\begin{align}
+    V_{p(\mathcal{D})}\left[\hat{V}_{\text{IIPS}}(\pi;\mathcal{D})\right] & = V_{p(\mathcal{D})}\left[\frac{1}{n}\sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)\right]                                                                                                                                  \\
+                                                                          & = \frac{1}{n} V_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)\right]                                                                                                                             \\
+                                                                          & = \frac{1}{n} \begin{aligned}[t]
+                                                                                              \Biggl( & \mathbb{E}_{p(u)\pi_{0}(S|x_{u})}\left[V_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)\right]\right]           \\
+                                                                                                      & + V_{p(u)\pi_{0}(S|x_{u})}\left[\mathbb{E}_{p(C,R|x_{u},S)}\left[\sum_{k = 1}^{K} \frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)} C_{i}(k)R_{i}(k)\right]\right] \Biggr)
+                                                                                          \end{aligned} \\
+\end{align}
+IPS推定量のような方策のランキングに対する確率ではなく、アイテムに対する確率になっていることから、IPS推定量よりもバリアンスが小さくなることを期待できる。
+
 \subsubsection{SNIIPS推定量}
+
+SNIIPS推定量は、
+\begin{equation}
+    \hat{V}_{\text{SNIIPS}}(\pi;\mathcal{D}) = \sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\frac{\pi(S_{i}(k) | x_{u_{i}}, k)}{\pi_{0}(S_{i}(k) | x_{u_{i}}, k)}}{\sum_{j = 1}^{n} \frac{\pi(S_{j}(k) | x_{u_{j}}, k)}{\pi_{0}(S_{j}(k) | x_{u_{j}}, k)}} C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
 
 \subsubsection{Naive推定量}
 
+Naive推定量は、
+\begin{equation}
+    \hat{V}_{\text{Naive}}(\pi;\mathcal{D}) = \sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\pi(S_{i}(k)|x_{u_{i}}, k)}{\sum_{j = 1}^{n}\pi(S_{j}(k)|x_{u_{j}}, k)} C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
+
 \subsubsection{DM推定量}
+
+DM推定量は、
+\begin{equation}
+    \hat{V}_{\text{DM}}(\pi;\mathcal{D}) = \frac{1}{n} \sum_{i = 1}^{n} \sum_{k = 1}^{K} \mathbb{E}_{\pi(S|x_{u_{i}})}\left[q(x_{u_{i}}, e_{S(k)})\right]
+\end{equation}
+で定義される推定量である。ここで、
+\begin{equation}
+    q(x_{u_{i}}, e_{S(k)}) = \mathbb{E}\left[C(k)R(k) | x_{u}, e_{S(k)}\right]
+\end{equation}
+である。すなわち、$q(x_{u_{i}}, e_{S(k)})$はユーザー$u$がアイテム$S(k)$をCVする確率である。
 
 \subsubsection{DR推定量}
 
