@@ -80,6 +80,7 @@ KPIは、推薦枠において発生する総CV数とする。
 \begin{equation}
     \mathcal{D} = \{(u_{i}, S_{i}, C_{i}, C_{i}R_{i})\}_{i = 1}^{n}
 \end{equation}
+ここで、$u_{i}$はユーザー、$S_{i}$はランキング形式で表示されたアイテム、$C_{i}$は$S_{i}$の各アイテムがクリックされたかを表すベクトル、$C_{i}R_{i}$は$S_{i}$の各アイテムがCVされたかを表すベクトルである。
 
 ログデータ$\mathcal{D}$の各要素は、独立同分布に従うとする。ログデータ$\mathcal{D}$の従う確率分布は、
 \begin{equation}
@@ -91,7 +92,7 @@ KPIは、推薦枠において発生する総CV数とする。
 
 KPIは、推薦枠において発生する総CV数とした。これより、方策の価値は推薦枠における期待CV数を表す
 \begin{equation}
-    V(\pi) = \mathbb{E}_{p(u)\pi(S|x_{u})p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K} C_{k}R_{k}\right]
+    V(\pi) = \mathbb{E}_{p(u)\pi(S|x_{u})p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K} C(k)R(k)\right]
 \end{equation}
 とする。
 
@@ -140,6 +141,48 @@ IPS推定量は、
                      \end{aligned}
 \end{align}
 アイテム数が多い場合にはランキングの組み合わせも多くなるため、$\pi_{0}(S|x_{u})$が小さくなることでバリアンスが大きくなることが予想される。
+
+\subsubsection{SNIPS推定量}
+
+SNIPS推定量は、
+\begin{equation}
+    \hat{V}_{\text{SNIPS}}(\pi; \mathcal{D}) = \frac{1}{\sum_{i = 1}^{n} \frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
+
+IPS推定量と異なるためバイアスは0にならないが、重要度重みが正規化されることでバリアンスを低減できることが期待される。
+
+\subsubsection{Clipped IPS推定量}
+
+Clipped IPS推定量は、
+\begin{equation}
+    \hat{V}_{\text{cIPS}}(\pi; \mathcal{D}, M) = \frac{1}{n} \sum_{i = 1}^{n} \min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)
+\end{equation}
+で定義される推定量である。
+
+まず、Clipped IPS推定量のバイアスは、
+\begin{align}
+    \text{Bias}\left[\hat{V}_{\text{cIPS}}(\pi; \mathcal{D}, M)\right] & = \mathbb{E}_{p(\mathcal{D})}\left[\hat{V}_{\text{cIPS}}(\pi; \mathcal{D}, M)\right] - V(\pi)                                                                                                                                                            \\
+                                                                       & = \begin{aligned}[t]
+                                                                               \mathbb{E}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n} \min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right] \\
+                                                                               - \mathbb{E}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]
+                                                                           \end{aligned}                                                                    \\
+                                                                       & = \mathbb{E}_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n} \left(\min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} - \frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}\right) \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]
+\end{align}
+となる。ここでは、$V(\pi) = \mathbb{E}_{p(\mathcal{D})}\left[\hat{V}_{\text{IPS}}(\pi; \mathcal{D})\right]$であることを用いた。
+\begin{equation}
+    \left(\min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} - \frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}\right) \le 0
+\end{equation}
+であるから、Clipped IPS推定量は不偏推定量ではなく、バイアスは0以下の値をとることがわかる。
+
+次に、Clipped IPS推定量のバリアンスは、IPS推定量と同様にして
+\begin{align}
+    V_{p(\mathcal{D})}\left[\hat{V}_{\text{cIPS}}(\pi; \mathcal{D}, M)\right]
+     & = V_{p(\mathcal{D})}\left[\frac{1}{n} \sum_{i = 1}^{n}\min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right]      \\
+     & = \frac{1}{n^{2}} \sum_{i = 1}^{n} V_{p(\mathcal{D})}\left[\min\left\{\frac{\pi(S_{i}|x_{u_{i}})}{\pi_{0}(S_{i}|x_{u_{i}})}, M\right\} \sum_{k = 1}^{K}C_{i}(k)R_{i}(k)\right] \\
+     & = \frac{1}{n} V_{p(u)\pi_{0}(S|x_{u})p(C,R|x_{u},S)}\left[\min\left\{\frac{\pi(S|x_{u})}{\pi_{0}(S|x_{u})}, M\right\} \sum_{k = 1}^{K}C(k)R(k)\right]
+\end{align}
+となる。Mで抑えることで、IPS推定量よりもバリアンスが小さくなることがわかる。
 
 \subsubsection{IIPS推定量}
 
@@ -190,27 +233,79 @@ SNIIPS推定量は、
 \end{equation}
 で定義される推定量である。
 
+IIPS推定量と異なるためバイアスは0にならないが、重要度重みが正規化されることでバリアンスを低減できることが期待される。
+
 \subsubsection{Naive推定量}
 
 Naive推定量は、
 \begin{equation}
-    \hat{V}_{\text{Naive}}(\pi;\mathcal{D}) = \sum_{i = 1}^{n}\sum_{k = 1}^{K} \frac{\pi(S_{i}(k)|x_{u_{i}}, k)}{\sum_{j = 1}^{n}\pi(S_{j}(k)|x_{u_{j}}, k)} C_{i}(k)R_{i}(k)
+    \hat{V}_{\text{Naive}}(\pi;\mathcal{D}) = \frac{1}{\sum_{i = 1}^{n}\sum_{k = 1}^{K} \pi(S_{i}(k)|x_{u_{i}}, k)} \sum_{i = 1}^{n}\sum_{k = 1}^{K} \pi(S_{i}(k)|x_{u_{i}}, k) C_{i}(k)R_{i}(k)
 \end{equation}
 で定義される推定量である。
+
+これは、$\pi$が確定的な方策の場合を考えると、ログを収集した時の方策$\pi_{0}$が出したランキングのk番目のアイテムと、新たな方策$\pi$が出したランキングのk番目のアイテムが一致した時のみ、その報酬を加算して平均した値となる。実際、i番目のサンプルに対して$\pi$がランキング$T_{i}$を確定的に出すとすると、
+\begin{align}
+    \hat{V}_{\text{Naive}}(\pi;\mathcal{D}) & = \frac{1}{\sum_{i = 1}^{n}\sum_{k = 1}^{K} \pi(S_{i}(k)|x_{u_{i}}, k)} \sum_{i = 1}^{n}\sum_{k = 1}^{K} \pi(S_{i}(k)|x_{u_{i}}, k) C_{i}(k)R_{i}(k)               \\
+                                            & = \frac{1}{\sum_{i = 1}^{n}\sum_{k = 1}^{K} \mathds{1}\{S_{i}(k) = T_{i}(k)\}} \sum_{i = 1}^{n}\sum_{k = 1}^{K} \mathds{1}\{S_{i}(k) = T_{i}(k)\} C_{i}(k)R_{i}(k)
+\end{align}
+
+バイアスはあるが、バリアンスを低減する効果があるようである。
 
 \subsubsection{DM推定量}
 
 DM推定量は、
 \begin{equation}
-    \hat{V}_{\text{DM}}(\pi;\mathcal{D}) = \frac{1}{n} \sum_{i = 1}^{n} \sum_{k = 1}^{K} \mathbb{E}_{\pi(S|x_{u_{i}})}\left[q(x_{u_{i}}, e_{S(k)})\right]
+    \hat{V}_{\text{DM}}(\pi;\mathcal{D}) = \frac{1}{n} \sum_{i = 1}^{n} \sum_{k = 1}^{K} \mathbb{E}_{\pi(S|x_{u_{i}})}\left[\hat{q}(x_{u_{i}}, e_{S(k)})\right]
 \end{equation}
 で定義される推定量である。ここで、
 \begin{equation}
     q(x_{u_{i}}, e_{S(k)}) = \mathbb{E}\left[C(k)R(k) | x_{u}, e_{S(k)}\right]
 \end{equation}
-である。すなわち、$q(x_{u_{i}}, e_{S(k)})$はユーザー$u$がアイテム$S(k)$をCVする確率である。
+である。すなわち、$q(x_{u_{i}}, e_{S(k)})$はユーザー$u$がアイテム$S(k)$をCVする確率である。$\hat{q}$は、ログデータから機械学習モデルを学習させることで得る。
+
+DM推定量は、$\hat{q}$の予測精度に依存したバイアスを持つが、バリアンスが小さい利点がある。
 
 \subsubsection{DR推定量}
+
+\clearpage
+
+\section{検索におけるランキングのオフ方策評価}
+
+\subsection{KPIを設定する}
+
+KPIは、推薦枠において発生する総CV数とする。
+
+\subsection{データの観測構造をモデル化する}
+
+対象となる推薦枠においてコンバージョンが発生するまでの一連の流れを以下のように整理する。
+
+\begin{enumerate}
+    \item ユーザーがサービスに訪問する。
+    \item ユーザーに検索条件を提示する。
+    \item ユーザーが検索条件を選択する。
+    \item 訪問ユーザーに対して、推薦枠内に複数のアイテムがランキング形式で表示される。
+    \item ユーザーの興味において、推薦枠内のいずれかのアイテムがクリックされる。クリックが発生しないケースもあり得る。
+    \item クリックされたアイテムについて、アイテム詳細ページに遷移した後、ユーザーの意思決定に基づきコンバージョンが発生するか否かが決定される。
+\end{enumerate}
+
+ログデータ$\mathcal{D}$は、以下のように定義する。
+\begin{equation}
+    \mathcal{D} = \{(u_{i}, q_{i}, l_{i}, S_{i}, C_{i}, C_{i}R_{i})\}_{i = 1}^{n}
+\end{equation}
+
+ログデータ$\mathcal{D}$の各要素は、独立同分布に従うとする。ログデータ$\mathcal{D}$の従う確率分布は、
+\begin{equation}
+    p(\mathcal{D}) = \prod_{i = 1}^{n} p(u_{i}, q_{i}, l_{i}, S_{i}, C_{i}, C_{i}R_{i}) = \prod_{i = 1}^{n} p(u_{i}) \pi^{q}_{0}(q_{i}|x_{u_{i}}) p(l_{i}|x_{u_{i}}, q_{i}) \pi^{s}_{0}(S_{i} | x_{u_{i}}, q_{i}, l_{i}) p(C_{i}, R_{i} | x_{u_{i}}, q_{i}, l_{i}, S_{i})
+\end{equation}
+とする。
+
+\subsection{解くべき問題を特定する}
+
+KPIは、推薦枠において発生する総CV数とした。これより、方策の価値は推薦枠における期待CV数を表す
+\begin{equation}
+    V(\pi) = \mathbb{E}_{p(u)\pi(S|x_{u})p(C, R|x_{u}, S)}\left[\sum_{k = 1}^{K} C(k)R(k)\right]
+\end{equation}
+とする。
 
 \clearpage
 
